@@ -113,7 +113,7 @@ function each(object,func){
   }
   return object
 }
-
+var isRegExp = /\/(.*?)\/([gimy]*)/
 
 function checker(func){
   if('function' == typeof func)
@@ -122,34 +122,47 @@ function checker(func){
 //  //console.log(typeof func, inspect(func))  
 
   if('object' != typeof func) {
-    if('string' === typeof func){
-      var r = new RegExp('^' + func + '$')
-//      //console.log(r)
-      return function (other){var m = r.exec(other); return m && m[0]}
+    var e
+    if('string' === typeof func && (e = isRegExp.exec(func))){
+      //check if string is a regular expression
+      r = new RegExp(e[1],e[2])
+      return function (other){
+      var m = r.exec(other); 
+ //     console.log(r.toString() + "(" + inspect(other) + ') = ' + (m && m[0]))
+
+      return m && m[0]
+      }
     } else {
-      return function (other){return other == func}
+      
+      x = function (other){
+      console.log(inspect(other) + " == " + func + ' = ' + (other == func))
+      return other == func
+      }
+      x.target = func // information for debuging, 
+      return x
     }
   }
   return function (other){
-    //console.log(inspect(func))
-    //console.log(inspect(other))
+      
 
     for (i in func){
-      key = checker(i)
+      key = checker(i)  //currently rebuilding checkers each iteration, bad.
       value = checker(func[i])
 
       var match = false
       for(j in other){
-        if(key(j) !== null)
+        if(key(j)){
+//          console.log("" + key.target + "(" + j + ") matched")
           if(value(other[j]))
             match = true
+        }
       }
       if (!match){
         //console.log("no match")
         return undefined
       }
     }
-    //console.log("matched object :" + inspect(other) + " to query " + inspect(func) )
+ //   console.log("matched object :" + inspect(other) + " to query " + inspect(func) )
     return other
   }
 //  throw new Error ("not implemented yet")    

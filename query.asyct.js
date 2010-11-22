@@ -100,12 +100,12 @@ exports ['can string matches are regular expressions'] = function (test){
     
   query(l)().should.eql(l)
   query(l)('hello').should.eql(['hello'])
-  query(l)('hello.*').should.eql(['hello','hello there'])
+  query(l)('/hello.*/').should.eql(['hello','hello there'])
     
-  query(l).first('e.+').should.eql('ewryozxcvn')
+  query(l).first('/e.+/').should.eql('ewryozxcvn')
   should.equal(query(l).first(''),null)
 
-  query(l).last('.*').should.eql('xxxxxxxx')
+  query(l).last('/.*/').should.eql('xxxxxxxx')
 
   test.finish()
 }
@@ -120,7 +120,7 @@ exports ['can match keys and values of an object'] = function (test){
 
   p.should.eql([ben])
   
-  var q = query(people)({name: "j.*"}) //get names beginning with j
+  var q = query(people)({name: "/j.*/"}) //get names beginning with j
   
   q.should.contain(john)
   q.should.contain(jane)
@@ -152,5 +152,38 @@ exports ['can call function on every item matched by a key'] = function (test){
 
   names.should.eql(['john','jane','ben'])
  
+  test.finish()
+}
+
+exports ['can search by keys'] = function (test){
+/*
+  I was turning strings in regex! very silly! i want to take every character literially, unless it's specificially a regex!
+*/
+
+
+  var star =  {'*': 'star'}
+    , dot = {'.': 'dot'}
+    , slash = {'/': 'slash'}
+    , question = {'?': 'question-mark'}
+  var vic = [star,dot,slash,question]
+
+//these queries will match any value, but only one key.
+
+  test.deepEqual(query(vic).all({'*':/.*?/}),[star])
+  test.deepEqual(query(vic).all({'.':/.*?/}),[dot])
+  test.deepEqual(query(vic).all({'/':/.*?/}),[slash])
+  test.deepEqual(query(vic).all({'?':/.*?/}),[question])
+
+  test.deepEqual(query(vic).first({'*':/.*?/}),star)
+  test.deepEqual(query(vic).first({'.':/.*?/}),dot)
+  test.deepEqual(query(vic).first({'/':/.*?/}),slash)
+  test.deepEqual(query(vic).first({'?':/.*?/}),question)
+
+  test.deepEqual(query(vic).last({'*':/.*?/}),star)
+  test.deepEqual(query(vic).last({'.':/.*?/}),dot)
+  test.deepEqual(query(vic).last({'/':/.*?/}),slash)
+  test.deepEqual(query(vic).last({'?':/.*?/}),question)
+
+
   test.finish()
 }
