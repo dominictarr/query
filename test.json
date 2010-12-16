@@ -1,0 +1,9 @@
+{ "name" :"query"
+, "author": "dominictarr"
+, "tests": 
+    { "inspect": 
+      { "test": "query/query.asynct"
+      , "target": "query"
+      }
+    }
+}
